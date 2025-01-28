@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>T9 Encoder</title>
+    <title>T9 Encoder & Decoder</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -19,37 +19,47 @@
 </head>
 <body>
 
-    <h2>T9 Text Encoder</h2>
-    <textarea id="inputText" rows="4" placeholder="Type your message here..."></textarea>
+    <h2>T9 Encoder & Decoder</h2>
+
+    <h3>Text to T9 Encoding</h3>
+    <textarea id="inputText" rows="3" placeholder="Type your message..."></textarea>
     <br>
     <button onclick="encodeT9()">Encode</button>
     <br>
-    <input type="text" id="outputText" readonly placeholder="Encoded output will appear here">
+    <input type="text" id="encodedText" readonly placeholder="Encoded output will appear here">
+
+    <h3>T9 to Text Decoding</h3>
+    <textarea id="inputT9" rows="3" placeholder="Type T9 sequence (use spaces between letters)..."></textarea>
+    <br>
+    <button onclick="decodeT9()">Decode</button>
+    <br>
+    <input type="text" id="decodedText" readonly placeholder="Decoded text will appear here">
 
     <script>
+        const t9Map = {
+            'a': '2', 'b': '22', 'c': '222',
+            'd': '3', 'e': '33', 'f': '333',
+            'g': '4', 'h': '44', 'i': '444',
+            'j': '5', 'k': '55', 'l': '555',
+            'm': '6', 'n': '66', 'o': '666',
+            'p': '7', 'q': '77', 'r': '777', 's': '7777',
+            't': '8', 'u': '88', 'v': '888',
+            'w': '9', 'x': '99', 'y': '999', 'z': '9999',
+            ' ': '0'
+        };
+
+        const t9ReverseMap = Object.fromEntries(Object.entries(t9Map).map(([key, value]) => [value, key]));
+
         function encodeT9() {
-            const t9Map = {
-                'a': '2', 'b': '22', 'c': '222',
-                'd': '3', 'e': '33', 'f': '333',
-                'g': '4', 'h': '44', 'i': '444',
-                'j': '5', 'k': '55', 'l': '555',
-                'm': '6', 'n': '66', 'o': '666',
-                'p': '7', 'q': '77', 'r': '777', 's': '7777',
-                't': '8', 'u': '88', 'v': '888',
-                'w': '9', 'x': '99', 'y': '999', 'z': '9999',
-                ' ': '0'
-            };
-
             let inputText = document.getElementById("inputText").value.toLowerCase();
-            let encodedText = '';
+            let encodedText = inputText.split('').map(char => t9Map[char] || '').join(' ');
+            document.getElementById("encodedText").value = encodedText.trim();
+        }
 
-            for (let char of inputText) {
-                if (t9Map[char]) {
-                    encodedText += t9Map[char] + ' ';
-                }
-            }
-
-            document.getElementById("outputText").value = encodedText.trim();
+        function decodeT9() {
+            let inputT9 = document.getElementById("inputT9").value.trim();
+            let decodedText = inputT9.split(' ').map(seq => t9ReverseMap[seq] || '').join('');
+            document.getElementById("decodedText").value = decodedText;
         }
     </script>
 
