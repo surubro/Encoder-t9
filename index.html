@@ -29,7 +29,7 @@
     <input type="text" id="encodedText" readonly placeholder="Encoded output will appear here">
 
     <h3>T9 to Text Decoding</h3>
-    <textarea id="inputT9" rows="3" placeholder="Type T9 sequence (use spaces between letters)..."></textarea>
+    <textarea id="inputT9" rows="3" placeholder="Type T9 sequence (use ' ' between words, '|' between letters)..."></textarea>
     <br>
     <button onclick="decodeT9()">Decode</button>
     <br>
@@ -52,13 +52,24 @@
 
         function encodeT9() {
             let inputText = document.getElementById("inputText").value.toLowerCase();
-            let encodedText = inputText.split('').map(char => t9Map[char] || '').join(' ');
-            document.getElementById("encodedText").value = encodedText.trim();
+            let encodedText = '';
+            let prevKey = '';
+
+            for (let char of inputText) {
+                let encodedChar = t9Map[char] || '';
+                if (prevKey && encodedChar.startsWith(prevKey[0])) {
+                    encodedText += '|'; // Separator to indicate a new letter
+                }
+                encodedText += encodedChar;
+                prevKey = encodedChar;
+            }
+
+            document.getElementById("encodedText").value = encodedText;
         }
 
         function decodeT9() {
             let inputT9 = document.getElementById("inputT9").value.trim();
-            let decodedText = inputT9.split(' ').map(seq => t9ReverseMap[seq] || '').join('');
+            let decodedText = inputT9.split('|').map(seq => t9ReverseMap[seq] || '').join('');
             document.getElementById("decodedText").value = decodedText;
         }
     </script>
