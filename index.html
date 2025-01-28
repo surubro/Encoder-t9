@@ -29,7 +29,7 @@
     <input type="text" id="encodedText" readonly placeholder="Encoded output will appear here">
 
     <h3>T9 to Text Decoding</h3>
-    <textarea id="inputT9" rows="3" placeholder="Type T9 sequence (use ' ' between words, '|' between letters)..."></textarea>
+    <textarea id="inputT9" rows="3" placeholder="Type T9 sequence (e.g., 3338822255 99966688)"></textarea>
     <br>
     <button onclick="decodeT9()">Decode</button>
     <br>
@@ -48,7 +48,11 @@
             ' ': '0'
         };
 
-        const t9ReverseMap = Object.fromEntries(Object.entries(t9Map).map(([key, value]) => [value, key]));
+        // Reverse mapping for decoding
+        const t9ReverseMap = {};
+        for (const [letter, sequence] of Object.entries(t9Map)) {
+            t9ReverseMap[sequence] = letter;
+        }
 
         function encodeT9() {
             let inputText = document.getElementById("inputText").value.toLowerCase();
@@ -57,8 +61,9 @@
 
             for (let char of inputText) {
                 let encodedChar = t9Map[char] || '';
+                // If the current character uses the same key as the previous one, add a space
                 if (prevKey && encodedChar.startsWith(prevKey[0])) {
-                    encodedText += '|'; // Separator to indicate a new letter
+                    encodedText += ' ';
                 }
                 encodedText += encodedChar;
                 prevKey = encodedChar;
@@ -69,7 +74,32 @@
 
         function decodeT9() {
             let inputT9 = document.getElementById("inputT9").value.trim();
-            let decodedText = inputT9.split('|').map(seq => t9ReverseMap[seq] || '').join('');
+            let decodedText = '';
+            let buffer = '';
+
+            for (let char of inputT9) {
+                if (char === ' ') {
+                    // Decode the buffered sequence before moving to the next letter
+                    if (buffer) {
+                        decodedText += t9ReverseMap[buffer] || '';
+                        buffer = '';
+                    }
+                    decodedText += ' '; // Preserve space between words
+                } else {
+                    // If the current number is different from the previous, decode the buffer
+                    if (buffer && char !== buffer[0]) {
+                        decodedText += t9ReverseMap[buffer] || '';
+                        buffer = '';
+                    }
+                    buffer += char;
+                }
+            }
+
+            // Decode the last buffered sequence
+            if (buffer) {
+                decodedText += t9ReverseMap[buffer] || '';
+            }
+
             document.getElementById("decodedText").value = decodedText;
         }
     </script>
